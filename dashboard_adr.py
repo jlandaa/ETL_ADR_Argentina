@@ -1,34 +1,48 @@
 import streamlit as st
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text # Agregamos text
 import plotly.express as px
-import sys
 import os
-# Añadimos la carpeta actual al "path" de Python para que encuentre el archivo ETL
+import sys
+
+# 1. Configuración de rutas y módulos
 sys.path.append(os.path.dirname(__file__))
-import ETL_ADR_Argentina  # IMPORTANTE: Esto conecta ambos archivos
+import etl_adr_argentina as etl 
 
-# Configuración de la página
-st.set_page_config(page_title="Dashboard ADRs Argentinos", layout="wide")
-
-# LÓGICA DE AUTO-ETL
+# 2. Configuración de Base de Datos
 db_file = 'adr_argentina.db'
 engine = create_engine(f'sqlite:///{db_file}')
 
-if not os.path.exists(db_file):
-    st.warning("Base de datos no encontrada. Iniciando ETL...")
-    raw = etl_adr_argentina.extract()
-    if raw is not None:
-        transformed = etl_adr_argentina.transform(raw)
-        etl_adr_argentina.load(transformed)
-        st.success("Datos cargados correctamente.")
+# 3. Lógica de Control de Datos (Auto-ETL)
+def check_and_run_etl():
+    # Verificamos si la tabla existe realmente en el archivo .db
+    table_exists = False
+    if os.path.exists(db_file):
+        with engine.connect() as conn:
+            # Consulta para verificar si la tabla market_data existe en SQLite
+            result = conn.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='market_data'"))
+            table_exists = result.fetchone() is not None
 
+    if not table_exists:
+        st.warning("📊 Generando base de datos financiera por primera vez...")
+        raw = etl.extract()
+        if raw is not None:
+            transformed = etl.transform(raw)
+            etl.load(transformed)
+            st.success("✅ Datos procesados y cargados.")
+        else:
+            st.error("No se pudieron obtener datos de la API.")
+            st.stop()
+
+# Ejecutamos la verificación antes de cualquier carga
+check_and_run_etl()
+
+# 4. Función de carga protegida
 def load_data():
     query = "SELECT * FROM market_data"
-    df = pd.read_sql(query, engine)
-    df['Date'] = pd.to_datetime(df['Date'])
-    return df
-
+    # Usamos la conexión de engine para leer
+    return pd.read_sql(query, engine.connect())
+    
 # --- INTERFAZ DEL DASHBOARD ---
 st.title("📊 Análisis de ADRs Argentinos")
 df = load_data()
@@ -60,6 +74,7 @@ if tickers:
     st.plotly_chart(fig_corr, use_container_width=True)
 else:
     st.warning("Selecciona al menos un ticker para visualizar los datos.")
+
 
 
 
