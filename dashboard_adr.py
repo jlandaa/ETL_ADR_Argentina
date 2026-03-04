@@ -7,7 +7,7 @@ import sys
 
 # 1. Configuración de rutas y módulos
 sys.path.append(os.path.dirname(__file__))
-import etl_adr_argentina as etl 
+import ETL_ADR_Argentina as etl 
 
 # 2. Configuración de Base de Datos
 db_file = 'adr_argentina.db'
@@ -74,6 +74,7 @@ if tickers:
     st.plotly_chart(fig_corr, use_container_width=True)
 else:
     st.warning("Selecciona al menos un ticker para visualizar los datos.")
+
 
 
 
