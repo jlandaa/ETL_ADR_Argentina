@@ -1,5 +1,3 @@
-# ETL_ADR_Argentina
-
 # 📊 ADRs Argentinos: End-to-End Data Pipeline & Dashboard
 
 Este proyecto implementa un ciclo completo de **Data Analysis** y **Data Engineering** para monitorear y analizar los **ADRs (American Depositary Receipts)** de empresas argentinas que cotizan en el NYSE. 
