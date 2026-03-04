@@ -2,7 +2,10 @@ import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine
 import plotly.express as px
+import sys
 import os
+# Añadimos la carpeta actual al "path" de Python para que encuentre el archivo ETL
+sys.path.append(os.path.dirname(__file__))
 import etl_adr_argentina  # IMPORTANTE: Esto conecta ambos archivos
 
 # Configuración de la página
@@ -57,3 +60,4 @@ if tickers:
     st.plotly_chart(fig_corr, use_container_width=True)
 else:
     st.warning("Selecciona al menos un ticker para visualizar los datos.")
+
