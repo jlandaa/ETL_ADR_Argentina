@@ -6,7 +6,7 @@ import sys
 import os
 # Añadimos la carpeta actual al "path" de Python para que encuentre el archivo ETL
 sys.path.append(os.path.dirname(__file__))
-import ETL_ADR_Argentina.py  # IMPORTANTE: Esto conecta ambos archivos
+import ETL_ADR_Argentina  # IMPORTANTE: Esto conecta ambos archivos
 
 # Configuración de la página
 st.set_page_config(page_title="Dashboard ADRs Argentinos", layout="wide")
@@ -60,5 +60,6 @@ if tickers:
     st.plotly_chart(fig_corr, use_container_width=True)
 else:
     st.warning("Selecciona al menos un ticker para visualizar los datos.")
+
 
 
