@@ -2,12 +2,23 @@ import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine
 import plotly.express as px
+import os
+import etl_adr_argentina  # IMPORTANTE: Esto conecta ambos archivos
 
 # Configuración de la página
 st.set_page_config(page_title="Dashboard ADRs Argentinos", layout="wide")
 
-# Conexión a la base de datos que creaste con el ETL
-engine = create_engine('sqlite:///adr_argentina.db')
+# LÓGICA DE AUTO-ETL
+db_file = 'adr_argentina.db'
+engine = create_engine(f'sqlite:///{db_file}')
+
+if not os.path.exists(db_file):
+    st.warning("Base de datos no encontrada. Iniciando ETL...")
+    raw = etl_adr_argentina.extract()
+    if raw is not None:
+        transformed = etl_adr_argentina.transform(raw)
+        etl_adr_argentina.load(transformed)
+        st.success("Datos cargados correctamente.")
 
 def load_data():
     query = "SELECT * FROM market_data"
@@ -15,10 +26,10 @@ def load_data():
     df['Date'] = pd.to_datetime(df['Date'])
     return df
 
+# --- INTERFAZ DEL DASHBOARD ---
 st.title("📊 Análisis de ADRs Argentinos")
 df = load_data()
 
-# Filtro de Tickers
 tickers = st.multiselect("Selecciona los ADRs a comparar:", 
                          options=df['Ticker'].unique(), 
                          default=["GGAL", "YPF"])
@@ -35,30 +46,14 @@ if tickers:
     fig_ret = px.histogram(df_filtered, x='Daily_Return', color='Ticker',
                            marginal="box", title="Distribución de Retornos Diarios")
     st.plotly_chart(fig_ret, use_container_width=True)
+
+    # Matriz de Correlación
+    st.markdown("---")
+    st.subheader("🔗 Matriz de Correlación de Retornos")
+    df_pivot = df.pivot(index='Date', columns='Ticker', values='Daily_Return')
+    corr_matrix = df_pivot.corr()
+    fig_corr = px.imshow(corr_matrix, text_auto=".2f", aspect="auto",
+                         color_continuous_scale='RdBu_r', zmin=-1, zmax=1)
+    st.plotly_chart(fig_corr, use_container_width=True)
 else:
     st.warning("Selecciona al menos un ticker para visualizar los datos.")
-
-
-
-# --- Nueva Sección: Matriz de Correlación ---
-st.markdown("---")
-st.subheader("🔗 Matriz de Correlación de Retornos")
-st.info("Muestra qué tan alineados se mueven los activos entre sí (1.0 es correlación perfecta).")
-
-# 1. Transformar datos de formato 'long' a 'wide' para calcular correlación
-df_pivot = df.pivot(index='Date', columns='Ticker', values='Daily_Return')
-
-# 2. Calcular la matriz de correlación de Pearson
-corr_matrix = df_pivot.corr()
-
-# 3. Crear el Mapa de Calor (Heatmap) con Plotly
-fig_corr = px.imshow(
-    corr_matrix,
-    text_auto=".2f", # Muestra los números con 2 decimales
-    aspect="auto",
-    color_continuous_scale='RdBu_r', # Rojo para negativa, Azul para positiva
-    zmin=-1, zmax=1,                 # Escala fija de correlación
-    title="Correlación de Retornos Diarios (Último Año)"
-)
-
-st.plotly_chart(fig_corr, use_container_width=True)
