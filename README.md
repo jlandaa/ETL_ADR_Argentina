@@ -20,7 +20,7 @@ Automatizar la recolección, transformación y visualización de activos financi
 El sistema se divide en tres fases modulares para asegurar la robustez del flujo:
 
 1.  **Extract:** Descarga automatizada de precios de cierre ajustados para tickers clave como `GGAL`, `YPF`, `BMA`, `PAM` y `CEPU`.
-2.  **Transform:** * Limpieza de datos y normalización de series temporales.
+2.  **Transform:** Limpieza de datos y normalización de series temporales.
     * Cálculo de **Retornos Diarios** porcentuales.
     * Generación de metadatos de procesamiento (`timestamp`).
 3.  **Load:** Persistencia de los datos en una base de datos relacional local (`.db`) para garantizar la integridad y velocidad de consulta desde el Dashboard.
