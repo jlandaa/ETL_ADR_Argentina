@@ -4,7 +4,7 @@ Este proyecto implementa un ciclo completo de **Data Analysis** y **Data Enginee
 
 ## 🔗 Demo en Vivo
 Puedes acceder al dashboard interactivo aquí:  
-👉 **[https://dashboard-adr.streamlit.app/](https://dashboard-adr.streamlit.app/)**
+👉 **[https://dashboard-adr.streamlit.app/](https://jml-dashboard-adr.streamlit.app/)**
 
 ## 🎯 Objetivo del Proyecto
 Automatizar la recolección, transformación y visualización de activos financieros para facilitar el análisis de volatilidad, retornos diarios y correlación de mercado en tiempo real.
