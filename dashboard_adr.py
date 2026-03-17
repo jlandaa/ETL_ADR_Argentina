@@ -59,9 +59,26 @@ if tickers:
                         title="Evolución de Precios (USD)")
     st.plotly_chart(fig_price, use_container_width=True)
     
-    # Gráfico de Retornos
-    fig_ret = px.histogram(df_filtered, x='Daily_Return', color='Ticker',
-                           marginal="box", title="Distribución de Retornos Diarios")
+    # --- Gráfico de Retornos (Optimizado para Data Quality) ---
+    # 1. Calculamos los límites para hacer zoom (descartamos el 1% de outliers extremos)
+    min_val = df_filtered['Daily_Return'].quantile(0.01)
+    max_val = df_filtered['Daily_Return'].quantile(0.99)
+
+    # 2. Generamos el histograma con granularidad y límites dinámicos
+    fig_ret = px.histogram(
+        df_filtered, 
+        x='Daily_Return', 
+        color='Ticker',
+        marginal="box", 
+        title="Distribución de Retornos Diarios (Zoom en el 98% del volumen)",
+        nbins=100, # Fuerza barras más finitas
+        range_x=[min_val, max_val] # Ajusta el eje X a la zona normal
+    )
+    
+    # 3. Superponemos las barras con transparencia para comparar mejor las distribuciones
+    fig_ret.update_layout(barmode='overlay')
+    fig_ret.update_traces(opacity=0.75)
+    
     st.plotly_chart(fig_ret, use_container_width=True)
 
     # Matriz de Correlación
