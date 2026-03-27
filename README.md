@@ -36,7 +36,7 @@ El sistema se divide en tres fases modulares para asegurar la robustez del flujo
 ## 🚀 Instalación y Uso Local
 1.  Clonar el repositorio:
     ```bash
-    git clone [https://github.com/jlandaa/ETL_ADR_Argentina.git](https://github.com/jlandaa/ETL_ADR_Argentina.git)
+    git clone https://github.com/jlandaa/ETL_ADR_Argentina.git
     ```
 2.  Crear y activar un entorno virtual:
     ```bash
