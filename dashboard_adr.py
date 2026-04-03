@@ -5,6 +5,15 @@ import plotly.express as px
 import os
 import sys
 
+st.markdown("""
+    <style>
+        .block-container {
+            padding-top: 2rem; /* Reduce el espacio superior */
+            padding-bottom: 0rem;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # 1. Configuración de rutas y módulos
 sys.path.append(os.path.dirname(__file__))
 import ETL_ADR_Argentina as etl 
