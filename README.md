@@ -13,7 +13,8 @@ Automatizar la recolección, transformación y visualización de activos financi
 * **Lenguaje:** Python (Pandas y NumPy para estadística financiera).
 * **Extracción:** API de Yahoo Finance (`yfinance`).
 * **Almacenamiento:** SQLite con SQLAlchemy (ORM).
-* **Visualización:** Streamlit y Plotly (UI/UX interactiva).
+* **Visualización:** Streamlit y Plotly (UI/UX corporativa con Sidebar).
+* **Observabilidad:** Módulo `logging` nativo para auditoría de procesos en backend.
 * **Despliegue:** Streamlit Community Cloud.
 
 ## 🏗️ Arquitectura del Pipeline (ETL)
@@ -25,12 +26,15 @@ El sistema se divide en tres fases modulares para asegurar la robustez del flujo
     * Generación de metadatos de procesamiento (`timestamp`).
 3.  **Load:** Persistencia de los datos en una base de datos relacional local (`.db`) para garantizar la integridad y velocidad de consulta desde el Dashboard.
 
+* **Observabilidad:** Registro silencioso de eventos (`etl_process.log`) para monitorear el estado de ejecución y detectar fallos de red sin interrumpir la experiencia del usuario.
+
 ## 📈 Funcionalidades del Dashboard
-* **KPIs Financieros (NUEVO):** Tarjetas de métricas interactivas que calculan en tiempo real el **Ratio de Sharpe** anualizado y el **Retorno Total** de la selección, con formateo dinámico condicional para gestionar escenarios de "Volatility Drag".
-* **Evolución Histórica:** Gráficos de líneas interactivos para comparar precios ajustados en USD de múltiples activos simultáneamente.
-* **Análisis de Riesgo y Volatilidad:** Histogramas y Box-plots superpuestos. Se implementó un zoom estadístico automático filtrando los percentiles 1% y 99% (Outlier Mitigation) para asegurar la máxima legibilidad de la campana de distribución.
-* **Matriz de Correlación:** Mapa de calor (Heatmap) dinámico que se ajusta a la selección del usuario para identificar movimientos conjuntos de mercado y oportunidades de diversificación.
-* **Auto-Healing ETL:** El dashboard detecta automáticamente el estado de la base de datos; si la tabla no existe o está vacía, dispara el proceso de extracción y carga de forma autónoma antes de renderizar la interfaz.
+* **UI/UX Corporativa y Filtros Temporales (NUEVO):** Diseño orientado a datos (Data-Driven) delegando los controles a un Sidebar lateral. Incluye filtros de tiempo dinámicos (1 Mes, YTD, 1 Año, etc.) para contextualizar los rendimientos históricos.
+* **Performance Optimizada (Caché):** Implementación de decoradores de memoria en RAM (`@st.cache_data`) con Time-To-Live (TTL), reduciendo a cero el impacto en la base de datos durante la interacción del usuario y garantizando respuestas en milisegundos.
+* **KPIs Financieros:** Tarjetas de métricas interactivas que calculan en tiempo real el **Ratio de Sharpe** anualizado y el **Retorno Total**, con formateo dinámico condicional para gestionar visualmente escenarios de "Volatility Drag".
+* **Análisis de Riesgo y Volatilidad:** Histogramas y Box-plots superpuestos con zoom estadístico automático filtrando los percentiles 1% y 99% (Outlier Mitigation) para asegurar la máxima legibilidad de la distribución.
+* **Matriz de Correlación:** Mapa de calor (Heatmap) interactivo para identificar movimientos conjuntos de mercado y oportunidades de diversificación.
+* **Auto-Healing ETL:** El dashboard detecta automáticamente el estado de la base de datos; si la tabla no existe, dispara el proceso de extracción y carga de forma autónoma antes de renderizar la interfaz.
 
 
 
