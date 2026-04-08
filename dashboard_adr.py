@@ -68,16 +68,16 @@ if tickers:
     cols = st.columns(len(tickers))
     
     for i, ticker in enumerate(tickers):
-        ticker_data = df_filtered[df_filtered['Ticker'] == ticker]['Daily_Return'].dropna()
+        t_data = df_filtered[df_filtered['Ticker'] == ticker].sort_values('Date')
+        ticker_returns = t_data['Daily_Return'].dropna()
         
-        if not ticker_data.empty:
+        if not ticker_returns.empty:
             # Cálculo del Ratio de Sharpe (Anualizado)
             # Asumimos una tasa libre de riesgo de 0 para simplificar el análisis de renta variable pura
-            sharpe_ratio = (ticker_data.mean() / ticker_data.std()) * (252**0.5)
+            sharpe_ratio = (ticker_returns.mean() / ticker_returns.std()) * (252**0.5)
             
             # Rendimiento Total en el periodo
-            total_ret = (df_filtered[df_filtered['Ticker'] == ticker]['Price_USD'].iloc[-1] / 
-                         df_filtered[df_filtered['Ticker'] == ticker]['Price_USD'].iloc[0] - 1) * 100
+            total_ret = (t_data['Price_USD'].iloc[-1] / t_data['Price_USD'].iloc[0] - 1) * 100
     
             with cols[i]:
                 st.metric(
@@ -116,7 +116,7 @@ if tickers:
     # Matriz de Correlación
     st.markdown("---")
     st.subheader("🔗 Matriz de Correlación de Retornos")
-    df_pivot = df.pivot(index='Date', columns='Ticker', values='Daily_Return')
+    df_pivot = df_filtered.pivot(index='Date', columns='Ticker', values='Daily_Return')
     corr_matrix = df_pivot.corr()
     fig_corr = px.imshow(corr_matrix, text_auto=".2f", aspect="auto",
                          color_continuous_scale='RdBu_r', zmin=-1, zmax=1)
