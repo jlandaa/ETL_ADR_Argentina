@@ -51,8 +51,19 @@ def load_data():
     query = "SELECT * FROM market_data"
     # Usamos la conexión de engine para leer
     return pd.read_sql(query, engine.connect())
+    
+# --- INTERFAZ DEL DASHBOARD ---
+st.title("📊 Análisis de ADRs Argentinos")
+df = load_data()
 
-# --- Cálculo de Métricas (Ratio de Sharpe) ---
+tickers = st.multiselect("Selecciona los ADRs a comparar:", 
+                         options=df['Ticker'].unique(), 
+                         default=["GGAL", "YPF"])
+
+if tickers:
+    df_filtered = df[df['Ticker'].isin(tickers)]
+
+    # --- Cálculo de Métricas (Ratio de Sharpe) ---
 st.markdown("### 📈 Métricas de Rendimiento")
 cols = st.columns(len(tickers))
 
@@ -74,18 +85,7 @@ for i, ticker in enumerate(tickers):
                 value=f"{sharpe_ratio:.2f}",
                 delta=f"{total_ret:.1f}% Retorno Total"
             )
-    
-# --- INTERFAZ DEL DASHBOARD ---
-st.title("📊 Análisis de ADRs Argentinos")
-df = load_data()
-
-tickers = st.multiselect("Selecciona los ADRs a comparar:", 
-                         options=df['Ticker'].unique(), 
-                         default=["GGAL", "YPF"])
-
-if tickers:
-    df_filtered = df[df['Ticker'].isin(tickers)]
-    
+        
     # Gráfico de Precios
     fig_price = px.line(df_filtered, x='Date', y='Price_USD', color='Ticker',
                         title="Evolución de Precios (USD)")
