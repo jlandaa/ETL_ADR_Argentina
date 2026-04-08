@@ -51,6 +51,29 @@ def load_data():
     query = "SELECT * FROM market_data"
     # Usamos la conexión de engine para leer
     return pd.read_sql(query, engine.connect())
+
+# --- Cálculo de Métricas (Ratio de Sharpe) ---
+st.markdown("### 📈 Métricas de Rendimiento")
+cols = st.columns(len(tickers))
+
+for i, ticker in enumerate(tickers):
+    ticker_data = df_filtered[df_filtered['Ticker'] == ticker]['Daily_Return'].dropna()
+    
+    if not ticker_data.empty:
+        # Cálculo del Ratio de Sharpe (Anualizado)
+        # Asumimos una tasa libre de riesgo de 0 para simplificar el análisis de renta variable pura
+        sharpe_ratio = (ticker_data.mean() / ticker_data.std()) * (252**0.5)
+        
+        # Rendimiento Total en el periodo
+        total_ret = (df_filtered[df_filtered['Ticker'] == ticker]['Price_USD'].iloc[-1] / 
+                     df_filtered[df_filtered['Ticker'] == ticker]['Price_USD'].iloc[0] - 1) * 100
+
+        with cols[i]:
+            st.metric(
+                label=f"Sharpe Ratio - {ticker}",
+                value=f"{sharpe_ratio:.2f}",
+                delta=f"{total_ret:.1f}% Retorno Total"
+            )
     
 # --- INTERFAZ DEL DASHBOARD ---
 st.title("📊 Análisis de ADRs Argentinos")
