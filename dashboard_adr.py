@@ -71,37 +71,36 @@ st.title("📊 Análisis de ADRs Argentinos")
 df = load_data()
 df['Date'] = pd.to_datetime(df['Date'])
 
-# --- NUEVO: FILTRO TEMPORAL ---
-st.markdown("### 📅 Período de Análisis")
-time_filter = st.radio(
+# --- CONTROLES EN EL SIDEBAR ---
+st.sidebar.header("⚙️ Filtros del Dashboard")
+
+st.sidebar.subheader("📅 Período de Análisis")
+time_filter = st.sidebar.radio(
     "Selecciona el rango de tiempo:",
     options=["1 Mes", "3 Meses", "6 Meses", "YTD", "1 Año", "Máximo"],
-    horizontal=True,
     index=4
 )
 
-# Lógica para calcular la fecha de corte basada en el último dato disponible
+# Lógica de fechas (se mantiene igual)
 max_date = df['Date'].max()
-
 if time_filter == "1 Mes":
     start_date = max_date - pd.DateOffset(months=1)
 elif time_filter == "3 Meses":
     start_date = max_date - pd.DateOffset(months=3)
 elif time_filter == "6 Meses":
     start_date = max_date - pd.DateOffset(months=6)
-elif time_filter == "YTD": # Year To Date (Desde el 1 de enero del año actual)
+elif time_filter == "YTD":
     start_date = pd.to_datetime(f"{max_date.year}-01-01")
 elif time_filter == "1 Año":
     start_date = max_date - pd.DateOffset(years=1)
-else: # "Máximo"
+else:
     start_date = df['Date'].min()
 
-# Filtramos el DataFrame original ANTES de que pase a los gráficos y métricas
 df = df[df['Date'] >= start_date]
 
-# --- FILTRO DE ACTIVOS ---
-st.markdown("---")
-tickers = st.multiselect(
+st.sidebar.markdown("---")
+st.sidebar.subheader("🏢 Activos")
+tickers = st.sidebar.multiselect(
     "Selecciona los ADRs a comparar:", 
     options=df['Ticker'].unique(), 
     default=["GGAL", "YPF"]
