@@ -77,7 +77,7 @@ time_filter = st.radio(
     "Selecciona el rango de tiempo:",
     options=["1 Mes", "3 Meses", "6 Meses", "YTD", "1 Año", "Máximo"],
     horizontal=True,
-    default="1 Año"
+    index=4
 )
 
 # Lógica para calcular la fecha de corte basada en el último dato disponible
