@@ -7,13 +7,13 @@ Puedes acceder al dashboard interactivo aquí:
 👉 **[https://jml-dashboard-adr.streamlit.app/](https://jml-dashboard-adr.streamlit.app/)**
 
 ## 🎯 Objetivo del Proyecto
-Automatizar la recolección, transformación y visualización de activos financieros para facilitar el análisis de volatilidad, retornos diarios y correlación de mercado en tiempo real.
+Automatizar la recolección, transformación y visualización de activos financieros para facilitar la toma de decisiones. La herramienta permite analizar la volatilidad, los retornos diarios, la correlación sectorial y el **rendimiento ajustado por riesgo** en tiempo real mediante un pipeline de datos robusto.
 
 ## 🛠️ Stack Tecnológico
-* **Lenguaje:** Python (Pandas, NumPy).
+* **Lenguaje:** Python (Pandas y NumPy para estadística financiera).
 * **Extracción:** API de Yahoo Finance (`yfinance`).
 * **Almacenamiento:** SQLite con SQLAlchemy (ORM).
-* **Visualización:** Streamlit y Plotly.
+* **Visualización:** Streamlit y Plotly (UI/UX interactiva).
 * **Despliegue:** Streamlit Community Cloud.
 
 ## 🏗️ Arquitectura del Pipeline (ETL)
@@ -26,10 +26,11 @@ El sistema se divide en tres fases modulares para asegurar la robustez del flujo
 3.  **Load:** Persistencia de los datos en una base de datos relacional local (`.db`) para garantizar la integridad y velocidad de consulta desde el Dashboard.
 
 ## 📈 Funcionalidades del Dashboard
-* **Evolución Histórica:** Gráficos interactivos para comparar precios en USD.
-* **Análisis de Volatilidad:** Histogramas con Box-plots para entender la distribución de retornos.
-* **Matriz de Correlación:** Mapa de calor (Heatmap) para identificar movimientos conjuntos de activos y diversificación de riesgo.
-* **Auto-Healing:** El dashboard detecta automáticamente el estado de la base de datos; si los datos no existen, dispara el proceso ETL de forma autónoma.
+* **KPIs Financieros (NUEVO):** Tarjetas de métricas interactivas que calculan en tiempo real el **Ratio de Sharpe** anualizado y el **Retorno Total** de la selección, con formateo dinámico condicional para gestionar escenarios de "Volatility Drag".
+* **Evolución Histórica:** Gráficos de líneas interactivos para comparar precios ajustados en USD de múltiples activos simultáneamente.
+* **Análisis de Riesgo y Volatilidad:** Histogramas y Box-plots superpuestos. Se implementó un zoom estadístico automático filtrando los percentiles 1% y 99% (Outlier Mitigation) para asegurar la máxima legibilidad de la campana de distribución.
+* **Matriz de Correlación:** Mapa de calor (Heatmap) dinámico que se ajusta a la selección del usuario para identificar movimientos conjuntos de mercado y oportunidades de diversificación.
+* **Auto-Healing ETL:** El dashboard detecta automáticamente el estado de la base de datos; si la tabla no existe o está vacía, dispara el proceso de extracción y carga de forma autónoma antes de renderizar la interfaz.
 
 
 
