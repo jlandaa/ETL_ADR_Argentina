@@ -4,6 +4,13 @@ from sqlalchemy import create_engine, text # Agregamos text
 import plotly.express as px
 import os
 import sys
+import logging
+
+logging.basicConfig(
+    filename='etl_process.log',      # Nombre del archivo silencioso
+    level=logging.INFO,              # Nivel de registro (INFO, WARNING, ERROR)
+    format='%(asctime)s - %(levelname)s - %(message)s' # Formato: Fecha - Nivel - Mensaje
+)
 
 st.markdown("""
     <style>
@@ -22,31 +29,36 @@ import ETL_ADR_Argentina as etl
 db_file = 'adr_argentina.db'
 engine = create_engine(f'sqlite:///{db_file}')
 
-# 3. Lógica de Control de Datos (Auto-ETL)
+# 3. Lógica de Control de Datos (Auto-ETL) con Logging
 def check_and_run_etl():
-    # Verificamos si la tabla existe realmente en el archivo .db
     table_exists = False
     if os.path.exists(db_file):
         with engine.connect() as conn:
-            # Consulta para verificar si la tabla market_data existe en SQLite
             result = conn.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='market_data'"))
             table_exists = result.fetchone() is not None
 
     if not table_exists:
         st.warning("📊 Generando base de datos financiera por primera vez...")
+        logging.info("Iniciando proceso ETL automático: No se detectó la base de datos local.") # <-- LOG
+        
         raw = etl.extract()
         if raw is not None:
             transformed = etl.transform(raw)
             etl.load(transformed)
             st.success("✅ Datos procesados y cargados.")
+            logging.info("Proceso ETL finalizado con éxito. Datos cargados en SQLite.") # <-- LOG
         else:
             st.error("No se pudieron obtener datos de la API.")
+            logging.error("Fallo crítico: No se pudieron extraer datos desde Yahoo Finance.") # <-- LOG ERROR
             st.stop()
+    else:
+        logging.info("Verificación de DB exitosa. Inicializando Dashboard.") # <-- LOG
 
 # Ejecutamos la verificación antes de cualquier carga
 check_and_run_etl()
 
 # 4. Función de carga protegida
+@st.cache_data(ttl=3600)  # Mantiene los datos en memoria por 1 hora (3600 segundos)
 def load_data():
     query = "SELECT * FROM market_data"
     # Usamos la conexión de engine para leer
@@ -54,11 +66,46 @@ def load_data():
     
 # --- INTERFAZ DEL DASHBOARD ---
 st.title("📊 Análisis de ADRs Argentinos")
-df = load_data()
 
-tickers = st.multiselect("Selecciona los ADRs a comparar:", 
-                         options=df['Ticker'].unique(), 
-                         default=["GGAL", "YPF"])
+# Carga inicial y conversión de fechas
+df = load_data()
+df['Date'] = pd.to_datetime(df['Date'])
+
+# --- NUEVO: FILTRO TEMPORAL ---
+st.markdown("### 📅 Período de Análisis")
+time_filter = st.radio(
+    "Selecciona el rango de tiempo:",
+    options=["1 Mes", "3 Meses", "6 Meses", "YTD", "1 Año", "Máximo"],
+    horizontal=True,
+    default="1 Año"
+)
+
+# Lógica para calcular la fecha de corte basada en el último dato disponible
+max_date = df['Date'].max()
+
+if time_filter == "1 Mes":
+    start_date = max_date - pd.DateOffset(months=1)
+elif time_filter == "3 Meses":
+    start_date = max_date - pd.DateOffset(months=3)
+elif time_filter == "6 Meses":
+    start_date = max_date - pd.DateOffset(months=6)
+elif time_filter == "YTD": # Year To Date (Desde el 1 de enero del año actual)
+    start_date = pd.to_datetime(f"{max_date.year}-01-01")
+elif time_filter == "1 Año":
+    start_date = max_date - pd.DateOffset(years=1)
+else: # "Máximo"
+    start_date = df['Date'].min()
+
+# Filtramos el DataFrame original ANTES de que pase a los gráficos y métricas
+df = df[df['Date'] >= start_date]
+
+# --- FILTRO DE ACTIVOS ---
+st.markdown("---")
+tickers = st.multiselect(
+    "Selecciona los ADRs a comparar:", 
+    options=df['Ticker'].unique(), 
+    default=["GGAL", "YPF"]
+)
 
 if tickers:
     df_filtered = df[df['Ticker'].isin(tickers)]
