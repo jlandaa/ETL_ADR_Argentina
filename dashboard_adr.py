@@ -79,10 +79,16 @@ if tickers:
             # Rendimiento Total en el periodo
             total_ret = (t_data['Price_USD'].iloc[-1] / t_data['Price_USD'].iloc[0] - 1) * 100
     
+            # Lógica de formateo dinámico
+            if abs(sharpe_ratio) < 0.01 and sharpe_ratio != 0:
+                sharpe_str = f"{sharpe_ratio:.4f}" # Muestra 4 decimales si es muy chiquito
+            else:
+                sharpe_str = f"{sharpe_ratio:.2f}" # Muestra 2 decimales si es un número normal
+
             with cols[i]:
                 st.metric(
                     label=f"Sharpe Ratio - {ticker}",
-                    value=f"{sharpe_ratio:.2f}",
+                    value=sharpe_str, # Usamos la variable dinámica
                     delta=f"{total_ret:.1f}% Retorno Total"
                 )
         
