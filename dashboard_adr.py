@@ -64,27 +64,27 @@ if tickers:
     df_filtered = df[df['Ticker'].isin(tickers)]
 
     # --- Cálculo de Métricas (Ratio de Sharpe) ---
-st.markdown("### 📈 Métricas de Rendimiento")
-cols = st.columns(len(tickers))
-
-for i, ticker in enumerate(tickers):
-    ticker_data = df_filtered[df_filtered['Ticker'] == ticker]['Daily_Return'].dropna()
+    st.markdown("### 📈 Métricas de Rendimiento")
+    cols = st.columns(len(tickers))
     
-    if not ticker_data.empty:
-        # Cálculo del Ratio de Sharpe (Anualizado)
-        # Asumimos una tasa libre de riesgo de 0 para simplificar el análisis de renta variable pura
-        sharpe_ratio = (ticker_data.mean() / ticker_data.std()) * (252**0.5)
+    for i, ticker in enumerate(tickers):
+        ticker_data = df_filtered[df_filtered['Ticker'] == ticker]['Daily_Return'].dropna()
         
-        # Rendimiento Total en el periodo
-        total_ret = (df_filtered[df_filtered['Ticker'] == ticker]['Price_USD'].iloc[-1] / 
-                     df_filtered[df_filtered['Ticker'] == ticker]['Price_USD'].iloc[0] - 1) * 100
-
-        with cols[i]:
-            st.metric(
-                label=f"Sharpe Ratio - {ticker}",
-                value=f"{sharpe_ratio:.2f}",
-                delta=f"{total_ret:.1f}% Retorno Total"
-            )
+        if not ticker_data.empty:
+            # Cálculo del Ratio de Sharpe (Anualizado)
+            # Asumimos una tasa libre de riesgo de 0 para simplificar el análisis de renta variable pura
+            sharpe_ratio = (ticker_data.mean() / ticker_data.std()) * (252**0.5)
+            
+            # Rendimiento Total en el periodo
+            total_ret = (df_filtered[df_filtered['Ticker'] == ticker]['Price_USD'].iloc[-1] / 
+                         df_filtered[df_filtered['Ticker'] == ticker]['Price_USD'].iloc[0] - 1) * 100
+    
+            with cols[i]:
+                st.metric(
+                    label=f"Sharpe Ratio - {ticker}",
+                    value=f"{sharpe_ratio:.2f}",
+                    delta=f"{total_ret:.1f}% Retorno Total"
+                )
         
     # Gráfico de Precios
     fig_price = px.line(df_filtered, x='Date', y='Price_USD', color='Ticker',
