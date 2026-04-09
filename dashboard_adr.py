@@ -172,8 +172,14 @@ if tickers:
                         # Agregamos el signo negativo al texto si el retorno es menor a 0
                         delta="- Retorno Total" if total_ret < 0 else "Retorno Total"
                     )
-                    # Agregamos las métricas extra en una sola línea horizontal para ahorrar espacio vertical
-                    st.caption(f"🔻 VaR (95%): {var_95:.2f}% &nbsp;&nbsp;|&nbsp;&nbsp; 📉 Drawdown Máximo: {max_drawdown:.2f}%")
+                    # Agregamos las métricas extra 
+                    risk_metrics_html = f"""
+                    <div style="font-size: 0.8em; color: #808495; line-height: 1.2;">
+                        <span style="display: inline-block; width: 75px;">VaR (95%):</span> {var_95:.2f}%<br>
+                        <span style="display: inline-block; width: 75px;">Drawdown:</span> {max_drawdown:.2f}%
+                    </div>
+                    """
+                    st.markdown(risk_metrics_html, unsafe_allow_html=True)
         
         # Pequeño espacio visual entre filas si hay más de 3 activos seleccionados
         st.write("")
