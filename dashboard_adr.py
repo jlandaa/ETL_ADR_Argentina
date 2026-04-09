@@ -166,9 +166,8 @@ if tickers:
                     # Agregamos el signo negativo al texto si el retorno es menor a 0
                     delta="- Retorno Total" if total_ret < 0 else "Retorno Total"
                 )
-                # Agregamos las métricas extra en texto pequeño
-                st.caption(f"🔻 VaR (95%): {var_95:.2f}%")
-                st.caption(f"📉 Max Drawdown: {max_drawdown:.2f}%")
+                # Agregamos las métricas extra en una sola línea horizontal para ahorrar espacio vertical
+                st.caption(f"🔻 VaR (95%): {var_95:.2f}% &nbsp;&nbsp;|&nbsp;&nbsp; 📉 Drawdown Máximo: {max_drawdown:.2f}%")
         
     # Gráfico de Precios
     fig_price = px.line(df_filtered, x='Date', y='Price_USD', color='Ticker',
