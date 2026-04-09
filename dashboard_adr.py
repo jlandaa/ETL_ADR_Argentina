@@ -105,7 +105,22 @@ tickers = st.sidebar.multiselect(
     options=df['Ticker'].unique(), 
     default=["GGAL", "YPF"]
 )
+st.sidebar.markdown("---")
+st.sidebar.subheader("📥 Exportar Datos")
 
+# Convertimos el DataFrame filtrado a CSV
+@st.cache_data
+def convert_df(df):
+    return df.to_csv(index=False).encode('utf-8')
+
+csv = convert_df(df_filtered)
+
+st.sidebar.download_button(
+    label="Descargar datos en CSV",
+    data=csv,
+    file_name='adrs_argentinos_filtrados.csv',
+    mime='text/csv',
+)
 if tickers:
     df_filtered = df[df['Ticker'].isin(tickers)]
 
@@ -131,12 +146,27 @@ if tickers:
             else:
                 sharpe_str = f"{sharpe_ratio:.2f}" # Muestra 2 decimales si es un número normal
 
+            # NUEVO: Métricas de Riesgo Institucional
+            # VaR 95%: El percentil 5 de los retornos diarios
+            var_95 = ticker_returns.quantile(0.05) * 100
+            
+            # Max Drawdown: La peor caída desde un pico histórico
+            cumulative_returns = (1 + ticker_returns).cumprod()
+            peak = cumulative_returns.cummax()
+            drawdown = (cumulative_returns - peak) / peak
+            max_drawdown = drawdown.min() * 100
+
+            # Modificamos cómo se dibuja la columna para mostrar todo
             with cols[i]:
                 st.metric(
-                    label=f"Sharpe Ratio - {ticker}",
-                    value=sharpe_str, # Usamos la variable dinámica
-                    delta=f"{total_ret:.1f}% Retorno Total"
+                    label=f"{ticker} (Sharpe: {sharpe_str})",
+                    value=f"{total_ret:.1f}%",
+                    delta="Retorno Total" if total_ret >= 0 else "Retorno Total",
+                    delta_color="normal"
                 )
+                # Agregamos las métricas extra en texto pequeño
+                st.caption(f"🔻 VaR (95%): {var_95:.2f}%")
+                st.caption(f"📉 Max Drawdown: {max_drawdown:.2f}%")
         
     # Gráfico de Precios
     fig_price = px.line(df_filtered, x='Date', y='Price_USD', color='Ticker',
