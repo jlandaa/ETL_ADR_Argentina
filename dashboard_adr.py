@@ -163,8 +163,8 @@ if tickers:
                 st.metric(
                     label=f"{ticker} (Sharpe: {sharpe_str})",
                     value=f"{total_ret:.1f}%",
-                    delta="Retorno Total" if total_ret >= 0 else "Retorno Total",
-                    delta_color="normal"
+                    # Agregamos el signo negativo al texto si el retorno es menor a 0
+                    delta="- Retorno Total" if total_ret < 0 else "Retorno Total"
                 )
                 # Agregamos las métricas extra en texto pequeño
                 st.caption(f"🔻 VaR (95%): {var_95:.2f}%")
