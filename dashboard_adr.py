@@ -171,7 +171,7 @@ if tickers:
                 risk_metrics_html = f"""
                 <div style="font-size: 0.82em; color: #808495; line-height: 1.4;">
                     🔻 VaR (95%): {var_95:.2f}%<br>
-                    📉 Drawdown: {max_drawdown:.2f}%
+                    📉 Max Drawdown: {max_drawdown:.2f}%
                 </div>
                 """
                 st.markdown(risk_metrics_html, unsafe_allow_html=True)
