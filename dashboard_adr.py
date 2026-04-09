@@ -126,10 +126,8 @@ if tickers:
         mime='text/csv',
     )
 
-# --- Cálculo de Métricas (Ratio de Sharpe) ---
+ # --- Cálculo de Métricas (Ratio de Sharpe) ---
     st.markdown("### 📈 Métricas de Rendimiento")
-    
-    # Forzamos una sola fila creando tantas columnas como tickers seleccionados
     cols = st.columns(len(tickers))
     
     for i, ticker in enumerate(tickers):
@@ -138,6 +136,7 @@ if tickers:
         
         if not ticker_returns.empty:
             # Cálculo del Ratio de Sharpe (Anualizado)
+            # Asumimos una tasa libre de riesgo de 0 para simplificar el análisis de renta variable pura
             sharpe_ratio = (ticker_returns.mean() / ticker_returns.std()) * (252**0.5)
             
             # Rendimiento Total en el periodo
@@ -145,33 +144,30 @@ if tickers:
     
             # Lógica de formateo dinámico
             if abs(sharpe_ratio) < 0.01 and sharpe_ratio != 0:
-                sharpe_str = f"{sharpe_ratio:.4f}"
+                sharpe_str = f"{sharpe_ratio:.4f}" # Muestra 4 decimales si es muy chiquito
             else:
-                sharpe_str = f"{sharpe_ratio:.2f}"
+                sharpe_str = f"{sharpe_ratio:.2f}" # Muestra 2 decimales si es un número normal
 
-            # Métricas de Riesgo Institucional
+            # NUEVO: Métricas de Riesgo Institucional
+            # VaR 95%: El percentil 5 de los retornos diarios
             var_95 = ticker_returns.quantile(0.05) * 100
             
+            # Max Drawdown: La peor caída desde un pico histórico
             cumulative_returns = (1 + ticker_returns).cumprod()
             peak = cumulative_returns.cummax()
             drawdown = (cumulative_returns - peak) / peak
             max_drawdown = drawdown.min() * 100
 
-            # Dibujamos todo en una sola línea
+            # Modificamos cómo se dibuja la columna para mostrar todo
             with cols[i]:
                 st.metric(
                     label=f"{ticker} (Sharpe: {sharpe_str})",
                     value=f"{total_ret:.1f}%",
+                    # Agregamos el signo negativo al texto si el retorno es menor a 0
                     delta="- Retorno Total" if total_ret < 0 else "Retorno Total"
                 )
-                
-                risk_metrics_html = f"""
-                <div style="font-size: 0.8em; color: #808495; line-height: 1.2;">
-                    <span style="display: inline-block; width: 75px;">VaR (95%):</span> {var_95:.2f}%<br>
-                    <span style="display: inline-block; width: 75px;">Drawdown:</span> {max_drawdown:.2f}%
-                </div>
-                """
-                st.markdown(risk_metrics_html, unsafe_allow_html=True)
+                # Agregamos las métricas extra en texto pequeño
+                st.caption(f"🔻 VaR (95%): {var_95:.2f}% &nbsp;&nbsp;|&nbsp;&nbsp; 📉 Drawdown Máximo: {max_drawdown:.2f}%")
         
     # Gráfico de Precios
     fig_price = px.line(df_filtered, x='Date', y='Price_USD', color='Ticker',
