@@ -169,9 +169,9 @@ if tickers:
                 # Agregamos las métricas extra en texto pequeño
                 # Solución UX: white-space: nowrap fuerza a que el número nunca se caiga al renglón de abajo
                 risk_metrics_html = f"""
-                <div style="font-size: 0.8em; color: #808495; line-height: 1.2; white-space: nowrap;">
-                    🔻 VaR (95%): {var_95:.2f}%<br>
-                    📉 Max Drawdown: {max_drawdown:.2f}%
+                <div style="font-size: 0.75em; color: #808495; line-height: 1.4;">
+                    <span style="white-space: nowrap;">🔻 VaR (95%): {var_95:.2f}%</span><br>
+                    <span style="white-space: nowrap;">📉 Max Drawdown: {max_drawdown:.2f}%</span>
                 </div>
                 """
                 st.markdown(risk_metrics_html, unsafe_allow_html=True)
