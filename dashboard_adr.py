@@ -105,24 +105,26 @@ tickers = st.sidebar.multiselect(
     options=df['Ticker'].unique(), 
     default=["GGAL", "YPF"]
 )
-st.sidebar.markdown("---")
-st.sidebar.subheader("📥 Exportar Datos")
 
-# Convertimos el DataFrame filtrado a CSV
-@st.cache_data
-def convert_df(df):
-    return df.to_csv(index=False).encode('utf-8')
-
-csv = convert_df(df_filtered)
-
-st.sidebar.download_button(
-    label="Descargar datos en CSV",
-    data=csv,
-    file_name='adrs_argentinos_filtrados.csv',
-    mime='text/csv',
-)
 if tickers:
     df_filtered = df[df['Ticker'].isin(tickers)]
+
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("📥 Exportar Datos")
+    
+    # Convertimos el DataFrame filtrado a CSV
+    @st.cache_data
+    def convert_df(df):
+        return df.to_csv(index=False).encode('utf-8')
+    
+    csv = convert_df(df_filtered)
+    
+    st.sidebar.download_button(
+        label="Descargar datos en CSV",
+        data=csv,
+        file_name='adrs_argentinos_filtrados.csv',
+        mime='text/csv',
+    )
 
     # --- Cálculo de Métricas (Ratio de Sharpe) ---
     st.markdown("### 📈 Métricas de Rendimiento")
