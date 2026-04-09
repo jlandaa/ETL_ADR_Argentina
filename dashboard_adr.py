@@ -167,7 +167,7 @@ if tickers:
                     delta="- Retorno Total" if total_ret < 0 else "Retorno Total"
                 )
                 # Agregamos las métricas extra en texto pequeño
-                 st.caption(f"🔻 VaR (95%): {var_95:.2f}%")
+                st.caption(f"🔻 VaR (95%): {var_95:.2f}%")
                 st.caption(f"📉 Max Drawdown: {max_drawdown:.2f}%")
         
     # Gráfico de Precios
