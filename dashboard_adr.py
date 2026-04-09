@@ -167,14 +167,8 @@ if tickers:
                     delta="- Retorno Total" if total_ret < 0 else "Retorno Total"
                 )
                 # Agregamos las métricas extra en texto pequeño
-                # Solución UX: white-space: nowrap fuerza a que el número nunca se caiga al renglón de abajo
-                risk_metrics_html = f"""
-                <div style="font-size: 0.75em; color: #808495; line-height: 1.4;">
-                    <span style="white-space: nowrap;">🔻 VaR (95%): {var_95:.2f}%</span><br>
-                    <span style="white-space: nowrap;">📉 Max Drawdown: {max_drawdown:.2f}%</span>
-                </div>
-                """
-                st.markdown(risk_metrics_html, unsafe_allow_html=True)
+                 st.caption(f"🔻 VaR (95%): {var_95:.2f}%")
+                st.caption(f"📉 Max Drawdown: {max_drawdown:.2f}%")
         
     # Gráfico de Precios
     fig_price = px.line(df_filtered, x='Date', y='Price_USD', color='Ticker',
