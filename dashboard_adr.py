@@ -166,16 +166,15 @@ if tickers:
                     # Agregamos el signo negativo al texto si el retorno es menor a 0
                     delta="- Retorno Total" if total_ret < 0 else "Retorno Total"
                 )
-                 # Agregamos las métricas extra en texto pequeño
-                # El caracter "\u00A0" es un "non-breaking space". 
-                # Actúa como un espacio invisible pero une las palabras, forzando a que no se separen en dos renglones.
-                
-                texto_var = f"🔻 VaR (95%):\u00A0{var_95:.2f}%"
-                texto_dd = f"📉 Max Drawdown:\u00A0{max_drawdown:.2f}%"
-                
-                # st.caption renderiza el texto en tamaño pequeño y en color gris (#808495 aprox)
-                # Los dos espacios al final de la primera línea ("  \n") indican un salto de línea en Markdown
-                st.caption(f"{texto_var}  \n{texto_dd}")
+                # Agregamos las métricas extra en texto pequeño
+                # Solución UX: white-space: nowrap fuerza a que el número nunca se caiga al renglón de abajo
+                risk_metrics_html = f"""
+                <div style="font-size: 0.75em; color: #808495; line-height: 1.4;">
+                    <span style="white-space: nowrap;">🔻 VaR (95%): {var_95:.2f}%</span><br>
+                    <span style="white-space: nowrap;">📉 Max Drawdown: {max_drawdown:.2f}%</span>
+                </div>
+                """
+                st.markdown(risk_metrics_html, unsafe_allow_html=True)
         
     # Gráfico de Precios
     fig_price = px.line(df_filtered, x='Date', y='Price_USD', color='Ticker',
