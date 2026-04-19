@@ -1,4 +1,6 @@
 # 📊 ADRs Argentinos: End-to-End Data Pipeline & Dashboard
+![Status: Maintained](https://img.shields.io/badge/Status-Maintained-brightgreen?style=for-the-badge)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
 Este proyecto implementa un ciclo completo de **Data Analysis** y **Data Engineering** para monitorear y analizar los **ADRs (American Depositary Receipts)** de empresas argentinas que cotizan en el NYSE. 
 
