@@ -1,3 +1,4 @@
+import numpy as np
 import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine, text # Agregamos text
@@ -225,6 +226,72 @@ if tickers:
 else:
     st.warning("Selecciona al menos un ticker para visualizar los datos.")
 
+# --- Simulador de Portafolios (Frontera de Markowitz) ---
+    st.markdown("---")
+    st.subheader("🧠 Optimizador de Portafolios (Markowitz)")
+    
+    # Necesitamos al menos 2 activos para hacer un portafolio
+    if len(tickers) > 1:
+        # 1. Parámetros y Cálculos Estadísticos (Anualizados)
+        returns_pivot = df_pivot.dropna()
+        mean_returns = returns_pivot.mean() * 252
+        cov_matrix = returns_pivot.cov() * 252
+        num_portfolios = 5000
+        risk_free_rate = 0.0 # Tasa libre de riesgo simplificada
+        
+        # Matrices para guardar los resultados
+        results = np.zeros((3, num_portfolios))
+        weights_record = []
+        
+        # 2. Simulación de Monte Carlo
+        for i in range(num_portfolios):
+            # Generar pesos aleatorios que sumen 1 (100%)
+            weights = np.random.random(len(tickers))
+            weights /= np.sum(weights)
+            weights_record.append(weights)
+            
+            # Aplicar fórmulas matemáticas (Álgebra Lineal)
+            portfolio_return = np.sum(mean_returns * weights)
+            portfolio_std_dev = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
+            
+            # Almacenar Retorno, Volatilidad y Ratio de Sharpe
+            results[0,i] = portfolio_return
+            results[1,i] = portfolio_std_dev
+            results[2,i] = (portfolio_return - risk_free_rate) / portfolio_std_dev
+            
+        # 3. Identificar el Portafolio Óptimo (Max Sharpe)
+        max_sharpe_idx = np.argmax(results[2])
+        opt_ret = results[0, max_sharpe_idx]
+        opt_vol = results[1, max_sharpe_idx]
+        opt_weights = weights_record[max_sharpe_idx]
+        
+        # 4. Visualización Interactiva
+        fig_ef = px.scatter(
+            x=results[1,:], y=results[0,:], color=results[2,:],
+            labels={'x': 'Riesgo (Volatilidad)', 'y': 'Retorno Esperado', 'color': 'Sharpe Ratio'},
+            title="Frontera Eficiente (5000 Simulaciones)",
+            color_continuous_scale="Viridis"
+        )
+        
+        # Resaltar la estrella roja (El mejor portafolio)
+        fig_ef.add_scatter(
+            x=[opt_vol], y=[opt_ret], mode='markers',
+            marker=dict(color='red', size=14, symbol='star'),
+            name='Máximo Sharpe', hoverinfo='skip'
+        )
+        
+        st.plotly_chart(fig_ef, use_container_width=True)
+        
+        # 5. Mostrar la recomendación de inversión
+        st.write("**Distribución Sugerida de Capital (Para Maximizar el Ratio de Sharpe):**")
+        weights_df = pd.DataFrame({
+            'Activo': tickers, 
+            'Asignación Sugerida': [f"{w*100:.1f}%" for w in opt_weights]
+        })
+        st.dataframe(weights_df, hide_index=True)
+        
+    else:
+        st.info("💡 Selecciona al menos dos activos en el menú lateral para habilitar el simulador de portafolios.")
 
 
 
