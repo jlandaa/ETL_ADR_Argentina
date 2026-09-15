@@ -100,10 +100,21 @@ df = df[df['Date'] >= start_date]
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("🏢 Activos")
+
+# 1. Obtenemos las opciones reales disponibles en el DataFrame filtrado
+opciones_tickers = df['Ticker'].unique().tolist()
+
+# 2. Definimos los que nos gustaría que estén por defecto
+valores_deseados = ["GGAL", "YPF"]
+
+# 3. Intersección: Solo guardamos los defaults que REALMENTE existen en las opciones
+defaults_validos = [ticker for ticker in valores_deseados if ticker in opciones_tickers]
+
+# 4. Renderizamos el widget de forma segura
 tickers = st.sidebar.multiselect(
     "Selecciona los ADRs a comparar:", 
-    options=df['Ticker'].unique(), 
-    default=["GGAL", "YPF"]
+    options=opciones_tickers, 
+    default=defaults_validos
 )
 
 if tickers:
