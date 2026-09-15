@@ -22,16 +22,19 @@ def extract():
 
 def transform(df):
     print("--- Iniciando Transformación ---")
-    # 1. Limpieza: Eliminar filas con valores nulos (días sin mercado)
-    df = df.dropna()
     
-    # 2. Resetear índice para tener la fecha como columna
+    # 1. Resetear índice para tener la fecha como columna
     df = df.reset_index()
     
-    # 3. Formato 'Long': Ideal para análisis de datos y SQL
+    # 2. Formato 'Long' (Convertimos columnas en filas)
     df_melted = df.melt(id_vars=['Date'], var_name='Ticker', value_name='Price_USD')
+
+    # 3. Limpieza Segura: Eliminamos nulos DESPUÉS del melt. 
+    # Así solo borramos el registro faltante, no el día completo.
+    df_melted = df_melted.dropna(subset=['Price_USD'])
     
     # 4. Cálculo de Retornos Diarios (%)
+    df_melted = df_melted.sort_values(by=['Ticker', 'Date'])
     df_melted['Daily_Return'] = df_melted.groupby('Ticker')['Price_USD'].pct_change()
     
     # 5. Agregar metadata: Fecha de procesamiento
