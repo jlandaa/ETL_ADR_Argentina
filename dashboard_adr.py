@@ -223,10 +223,8 @@ if tickers:
     fig_corr = px.imshow(corr_matrix, text_auto=".2f", aspect="auto",
                          color_continuous_scale='RdBu_r', zmin=-1, zmax=1)
     st.plotly_chart(fig_corr, use_container_width=True)
-else:
-    st.warning("Selecciona al menos un ticker para visualizar los datos.")
 
-# --- Simulador de Portafolios (Frontera de Markowitz) ---
+    # --- Simulador de Portafolios (Frontera de Markowitz) ---
     st.markdown("---")
     st.subheader("🧠 Optimizador de Portafolios (Markowitz)")
     
@@ -293,6 +291,9 @@ else:
     else:
         st.info("💡 Selecciona al menos dos activos en el menú lateral para habilitar el simulador de portafolios.")
 
+# ---> Cierre del bloque principal <---
+else:
+    st.warning("Selecciona al menos un ticker para visualizar los datos.")
 
 
 
