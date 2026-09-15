@@ -290,6 +290,81 @@ if tickers:
         
     else:
         st.info("💡 Selecciona al menos dos activos en el menú lateral para habilitar el simulador de portafolios.")
+    # --- Análisis "What-If" (Simulador Manual de Portafolio) ---
+    st.markdown("---")
+    st.subheader("🎛️ Análisis 'What-If': Construye tu propio Portafolio")
+    
+    st.write("¿Qué hubiera pasado si invertías tu propio capital con una distribución personalizada?")
+    
+    # Dividimos la pantalla en dos columnas para mejor UX
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.markdown("#### 1. Configura tu Inversión")
+        # Input de capital inicial
+        initial_capital = st.number_input(
+            "Capital Inicial (USD):", 
+            min_value=100.0, 
+            value=10000.0, 
+            step=1000.0
+        )
+        
+        st.markdown("**Asigna el peso a cada activo:**")
+        custom_weights = {}
+        # Creamos un slider dinámico por cada ticker seleccionado
+        for ticker in tickers:
+            custom_weights[ticker] = st.slider(f"{ticker} (%)", 0, 100, int(100/len(tickers)))
+            
+        total_weight = sum(custom_weights.values())
+        
+        # Validación de pesos
+        if total_weight == 0:
+            st.error("⚠️ La suma de los pesos no puede ser 0%.")
+            valid_portfolio = False
+        else:
+            if total_weight != 100:
+                st.warning(f"Suma: {total_weight}%. Se normalizará matemáticamente al 100%.")
+            valid_portfolio = True
+            
+    with col2:
+        st.markdown("#### 2. Evolución de tu Capital")
+        if valid_portfolio:
+            # Normalizamos los pesos para que siempre sumen 1 (100%)
+            normalized_weights = np.array([custom_weights[t] / total_weight for t in tickers])
+            
+            # Calculamos los retornos diarios de este portafolio personalizado
+            clean_pivot = df_pivot.dropna()
+            port_daily_returns = clean_pivot[tickers].dot(normalized_weights)
+            
+            # Calculamos el crecimiento compuesto del capital
+            cumulative_returns = (1 + port_daily_returns).cumprod()
+            portfolio_value_series = initial_capital * cumulative_returns
+            
+            # Armamos un DataFrame para graficar
+            df_portfolio = pd.DataFrame({
+                'Date': clean_pivot.index,
+                'Capital (USD)': portfolio_value_series
+            }).reset_index()
+            
+            # Gráfico de la curva de equity
+            fig_whatif = px.line(
+                df_portfolio, x='Date', y='Capital (USD)',
+                title=f"Proyección de un portafolio de ${initial_capital:,.2f} USD"
+            )
+            # Rellenamos el área bajo la curva para darle un toque más financiero
+            fig_whatif.update_traces(fill='tozeroy', line_color='#00b4d8')
+            
+            st.plotly_chart(fig_whatif, use_container_width=True)
+            
+            # Calculamos y mostramos el resultado final
+            final_value = portfolio_value_series.iloc[-1]
+            total_ret_whatif = (final_value / initial_capital - 1) * 100
+            
+            st.metric(
+                label="Valor Final del Portafolio", 
+                value=f"${final_value:,.2f} USD", 
+                delta=f"{total_ret_whatif:.2f}% de Rentabilidad Acumulada"
+            )
 
 # ---> Cierre del bloque principal <---
 else:
