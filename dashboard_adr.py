@@ -340,9 +340,8 @@ if tickers:
             cumulative_returns = (1 + port_daily_returns).cumprod()
             portfolio_value_series = initial_capital * cumulative_returns
             
-            # Armamos un DataFrame para graficar
+            # Armamos un DataFrame para graficar (CORREGIDO)
             df_portfolio = pd.DataFrame({
-                'Date': clean_pivot.index,
                 'Capital (USD)': portfolio_value_series
             }).reset_index()
             
