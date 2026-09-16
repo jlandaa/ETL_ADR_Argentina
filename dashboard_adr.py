@@ -135,6 +135,10 @@ if tickers:
     else:
         df_filtered['Price_Active'] = df_filtered['Price_USD']
         currency = "USD"
+        
+    # Recalcular los retornos basándose en la moneda activa
+    df_filtered = df_filtered.sort_values(by=['Ticker', 'Date'])
+    df_filtered['Active_Return'] = df_filtered.groupby('Ticker')['Price_Active'].pct_change()
 
     st.sidebar.markdown("---")
     st.sidebar.subheader("📥 Exportar Datos")
@@ -159,7 +163,7 @@ if tickers:
     
     for i, ticker in enumerate(tickers):
         t_data = df_filtered[df_filtered['Ticker'] == ticker].sort_values('Date')
-        ticker_returns = t_data['Daily_Return'].dropna()
+        ticker_returns = t_data['Active_Return'].dropna()
         
         if not ticker_returns.empty:
             # Cálculo del Ratio de Sharpe (Anualizado)
@@ -209,22 +213,20 @@ if tickers:
     st.plotly_chart(fig_price, use_container_width=True)
     
     # --- Gráfico de Retornos (Optimizado para Data Quality) ---
-    # 1. Calculamos los límites para hacer zoom (descartamos el 1% de outliers extremos)
-    min_val = df_filtered['Daily_Return'].quantile(0.01)
-    max_val = df_filtered['Daily_Return'].quantile(0.99)
+    # Cambiamos Daily_Return por Active_Return
+    min_val = df_filtered['Active_Return'].quantile(0.01)
+    max_val = df_filtered['Active_Return'].quantile(0.99)
 
-    # 2. Generamos el histograma con granularidad y límites dinámicos
     fig_ret = px.histogram(
         df_filtered, 
-        x='Daily_Return', 
+        x='Active_Return',
         color='Ticker',
         marginal="box", 
-        title="Distribución de Retornos Diarios (Zoom en el 98% del volumen)",
-        nbins=100, # Fuerza barras más finitas
-        range_x=[min_val, max_val] # Ajusta el eje X a la zona normal
+        title=f"Distribución de Retornos Diarios en {currency} (Zoom 98%)",
+        nbins=100,
+        range_x=[min_val, max_val]
     )
     
-    # 3. Superponemos las barras con transparencia para comparar mejor las distribuciones
     fig_ret.update_layout(barmode='overlay')
     fig_ret.update_traces(opacity=0.75)
     
@@ -232,8 +234,9 @@ if tickers:
 
     # Matriz de Correlación
     st.markdown("---")
-    st.subheader("🔗 Matriz de Correlación de Retornos")
-    df_pivot = df_filtered.pivot(index='Date', columns='Ticker', values='Daily_Return')
+    st.subheader(f"🔗 Matriz de Correlación de Retornos ({currency})")
+    # Cambiamos Daily_Return por Active_Return
+    df_pivot = df_filtered.pivot(index='Date', columns='Ticker', values='Active_Return') 
     corr_matrix = df_pivot.corr()
     fig_corr = px.imshow(corr_matrix, text_auto=".2f", aspect="auto",
                          color_continuous_scale='RdBu_r', zmin=-1, zmax=1)
@@ -357,13 +360,13 @@ if tickers:
             
             # Armamos un DataFrame para graficar (CORREGIDO)
             df_portfolio = pd.DataFrame({
-                'Capital (USD)': portfolio_value_series
+                f'Capital ({currency})': portfolio_value_series
             }).reset_index()
             
             # Gráfico de la curva de equity
             fig_whatif = px.line(
-                df_portfolio, x='Date', y='Capital (USD)',
-                title=f"Proyección de un portafolio de ${initial_capital:,.2f} USD"
+                df_portfolio, x='Date', y=f'Capital ({currency})',
+                title=f"Proyección de un portafolio de ${initial_capital:,.2f} {currency}"
             )
             # Rellenamos el área bajo la curva para darle un toque más financiero
             fig_whatif.update_traces(fill='tozeroy', line_color='#00b4d8')
@@ -375,8 +378,8 @@ if tickers:
             total_ret_whatif = (final_value / initial_capital - 1) * 100
             
             st.metric(
-                label="Valor Final del Portafolio", 
-                value=f"${final_value:,.2f} USD", 
+                label=f"Valor Final del Portafolio ({currency})", 
+                value=f"${final_value:,.2f}", 
                 delta=f"{total_ret_whatif:.2f}% de Rentabilidad Acumulada"
             )
 
