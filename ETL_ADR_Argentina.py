@@ -40,28 +40,6 @@ def transform(df):
     
     return df_melted
 
-def transform(df):
-    print("--- Iniciando Transformación ---")
-    
-    # 1. Resetear índice para tener la fecha como columna
-    df = df.reset_index()
-    
-    # 2. Formato 'Long' (Convertimos columnas en filas)
-    df_melted = df.melt(id_vars=['Date'], var_name='Ticker', value_name='Price_USD')
-
-    # 3. Limpieza Segura: Eliminamos nulos DESPUÉS del melt. 
-    # Así solo borramos el registro faltante, no el día completo.
-    df_melted = df_melted.dropna(subset=['Price_USD'])
-    
-    # 4. Cálculo de Retornos Diarios (%)
-    df_melted = df_melted.sort_values(by=['Ticker', 'Date'])
-    df_melted['Daily_Return'] = df_melted.groupby('Ticker')['Price_USD'].pct_change()
-    
-    # 5. Agregar metadata: Fecha de procesamiento
-    df_melted['processed_at'] = datetime.now()
-    
-    return df_melted
-
 def load(df):
     print("--- Iniciando Carga a SQLite ---")
     # Creamos la conexión a la base de datos local
