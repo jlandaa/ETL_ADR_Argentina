@@ -24,6 +24,9 @@ def transform(df):
     # 1. Cálculo del Dólar CCL Sintético
     # Ratio de conversión: 10 acciones locales = 1 ADR en NY
     df['Dolar_CCL'] = (df['GGAL.BA'] / df['GGAL']) * 10
+
+    # Rellena los huecos (feriados) propagando el dólar del día anterior hacia adelante
+    df['Dolar_CCL'] = df['Dolar_CCL'].ffill()
     
     # 2. Descartamos la acción local para no arruinar el dashboard de ADRs
     df = df.drop(columns=['GGAL.BA'])
