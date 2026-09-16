@@ -122,6 +122,12 @@ if tickers:
     # Usamos .copy() para no modificar el dataset original
     df_filtered = df[df['Ticker'].isin(tickers)].copy()
 
+    # 1. CREAMOS EL BOTÓN EN EL SIDEBAR
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("🇦🇷 Contexto Macroeconómico")
+    show_in_ars = st.sidebar.toggle("💸 Ver precios en Pesos (Efecto CCL)", value=False)
+
+    # 2. EVALUAMOS SI ESTÁ PRENDIDO O APAGADO
     # Lógica Macroeconómica: Conversión de Divisas
     if show_in_ars:
         df_filtered['Price_Active'] = df_filtered['Price_USD'] * df_filtered['Dolar_CCL']
@@ -146,10 +152,6 @@ if tickers:
         file_name='adrs_argentinos_filtrados.csv',
         mime='text/csv',
     )
-
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("🇦🇷 Contexto Macroeconómico")
-    show_in_ars = st.sidebar.toggle("💸 Ver precios en Pesos (Efecto CCL)", value=False)
 
  # --- Cálculo de Métricas (Ratio de Sharpe) ---
     st.markdown("### 📈 Métricas de Rendimiento")
