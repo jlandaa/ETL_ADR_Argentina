@@ -30,13 +30,16 @@ El sistema se divide en tres fases modulares para asegurar la robustez del flujo
 
 * **Observabilidad:** Registro silencioso de eventos (`etl_process.log`) para monitorear el estado de ejecución y detectar fallos de red sin interrumpir la experiencia del usuario.
 
-## 📈 Funcionalidades del Dashboard
-* **UI/UX Corporativa y Filtros Temporales (NUEVO):** Diseño orientado a datos (Data-Driven) delegando los controles a un Sidebar lateral. Incluye filtros de tiempo dinámicos (1 Mes, YTD, 1 Año, etc.) para contextualizar los rendimientos históricos.
-* **Performance Optimizada (Caché):** Implementación de decoradores de memoria en RAM (`@st.cache_data`) con Time-To-Live (TTL), reduciendo a cero el impacto en la base de datos durante la interacción del usuario y garantizando respuestas en milisegundos.
-* **KPIs Financieros:** Tarjetas de métricas interactivas que calculan en tiempo real el **Ratio de Sharpe** anualizado y el **Retorno Total**, con formateo dinámico condicional para gestionar visualmente escenarios de "Volatility Drag".
+## 📈 Funcionalidades del Dashboard y Analytics
+
+* **Optimizador de Portafolios (Markowitz):** Integración de un motor de simulación estocástica (Monte Carlo) que genera miles de combinaciones de activos en tiempo real para graficar la **Frontera Eficiente**. Identifica matemáticamente la cartera de Máximo Ratio de Sharpe y sugiere la distribución óptima de capital.
+* **Análisis Cuantitativo "What-If":** Simulador dinámico e interactivo que permite al usuario asignar capital y pesos porcentuales personalizados mediante *sliders*. El sistema normaliza matemáticamente las proporciones base 100 y calcula la curva de *equity* histórica utilizando vectorización pura en Pandas.
+* **Integración Macroeconómica Sintética:** Desarrollo de lógica cruzada de activos locales (BYMA) e internacionales (NYSE) para calcular en el backend el **Dólar CCL implícito**. Incluye un *toggle* en la interfaz para deflactar los precios en tiempo real y aislar el rendimiento genuino de la ilusión monetaria (inflación/devaluación).
+* **Métricas de Riesgo Institucional:** Evolución de las tarjetas de KPIs clásicas hacia un análisis de riesgo profundo. Calcula en tiempo real el Ratio de Sharpe anualizado, el **VaR (Value at Risk al 95%)** y el **Maximum Drawdown**, métricas estándar en la industria de fondos de inversión.
+* **Auto-Healing ETL & Data Quality:** Pipeline de datos defensivo. El sistema detecta autónomamente si falta la base de datos y la regenera. Implementa limpieza segura mediante `.dropna()` orientada a celdas para evitar el borrado masivo por fallos de API, y utiliza *Forward Fill* (`.ffill()`) para corregir desincronizaciones de feriados entre calendarios internacionales.
 * **Análisis de Riesgo y Volatilidad:** Histogramas y Box-plots superpuestos con zoom estadístico automático filtrando los percentiles 1% y 99% (Outlier Mitigation) para asegurar la máxima legibilidad de la distribución.
 * **Matriz de Correlación:** Mapa de calor (Heatmap) interactivo para identificar movimientos conjuntos de mercado y oportunidades de diversificación.
-* **Auto-Healing ETL:** El dashboard detecta automáticamente el estado de la base de datos; si la tabla no existe, dispara el proceso de extracción y carga de forma autónoma antes de renderizar la interfaz.
+* **UI/UX Corporativa y Performance Optimizada:** Diseño *Data-Driven* con filtros temporales dinámicos en un Sidebar. Implementación de decoradores de memoria en RAM (`@st.cache_data`) con Time-To-Live (TTL), reduciendo el impacto en la base de datos a cero durante la interacción del usuario y garantizando respuestas en milisegundos.
 
 
 
