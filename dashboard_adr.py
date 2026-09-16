@@ -138,6 +138,10 @@ if tickers:
         mime='text/csv',
     )
 
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("🇦🇷 Contexto Macroeconómico")
+    show_in_ars = st.sidebar.toggle("💸 Ver precios en Pesos (Efecto CCL)", value=False)
+
  # --- Cálculo de Métricas (Ratio de Sharpe) ---
     st.markdown("### 📈 Métricas de Rendimiento")
     cols = st.columns(len(tickers))
