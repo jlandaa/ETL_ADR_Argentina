@@ -119,7 +119,17 @@ tickers = st.sidebar.multiselect(
 )
 
 if tickers:
-    df_filtered = df[df['Ticker'].isin(tickers)]
+    if tickers:
+    # Usamos .copy() para no modificar el dataset original
+    df_filtered = df[df['Ticker'].isin(tickers)].copy()
+
+    # Lógica Macroeconómica: Conversión de Divisas
+    if show_in_ars:
+        df_filtered['Price_Active'] = df_filtered['Price_USD'] * df_filtered['Dolar_CCL']
+        currency = "ARS (Pesos)"
+    else:
+        df_filtered['Price_Active'] = df_filtered['Price_USD']
+        currency = "USD"
 
     st.sidebar.markdown("---")
     st.sidebar.subheader("📥 Exportar Datos")
@@ -156,7 +166,7 @@ if tickers:
             sharpe_ratio = (ticker_returns.mean() / ticker_returns.std()) * (252**0.5)
             
             # Rendimiento Total en el periodo
-            total_ret = (t_data['Price_USD'].iloc[-1] / t_data['Price_USD'].iloc[0] - 1) * 100
+            total_ret = (t_data['Price_Active'].iloc[-1] / t_data['Price_Active'].iloc[0] - 1) * 100
     
             # Lógica de formateo dinámico
             if abs(sharpe_ratio) < 0.01 and sharpe_ratio != 0:
@@ -192,9 +202,9 @@ if tickers:
                 """
                 st.markdown(risk_metrics_html, unsafe_allow_html=True)
         
-    # Gráfico de Precios
-    fig_price = px.line(df_filtered, x='Date', y='Price_USD', color='Ticker',
-                        title="Evolución de Precios (USD)")
+    # Gráfico de Precios Dinámico
+    fig_price = px.line(df_filtered, x='Date', y='Price_Active', color='Ticker',
+                        title=f"Evolución de Precios en {currency}")
     st.plotly_chart(fig_price, use_container_width=True)
     
     # --- Gráfico de Retornos (Optimizado para Data Quality) ---
