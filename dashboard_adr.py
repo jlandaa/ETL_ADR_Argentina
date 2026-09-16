@@ -118,7 +118,6 @@ tickers = st.sidebar.multiselect(
     default=defaults_validos
 )
 
-if tickers:
     if tickers:
     # Usamos .copy() para no modificar el dataset original
     df_filtered = df[df['Ticker'].isin(tickers)].copy()
