@@ -3,9 +3,6 @@ import pandas as pd
 from sqlalchemy import create_engine
 from datetime import datetime
 
-# Obtenemos la clave de forma segura desde los secretos de Streamlit
-FRED_API_KEY = st.secrets["FRED_API_KEY"]
-
 def extract():
     print("--- Iniciando Extracción Consolidada ---")
     # Sumamos ARS=X (Dólar Oficial) y ^TNX (Tasa del Tesoro a 10 años) a la lista
