@@ -47,10 +47,15 @@ def transform(raw_data): # Corregido: Ahora recibe el diccionario
     df = raw_data['yf'].copy()
     macro_df = raw_data['macro'].copy()
 
-    # ---> NUEVO: Normalizamos las zonas horarias para que Pandas pueda cruzarlas <---
-    df.index = pd.to_datetime(df.index)
+    # NUEVO: Normalización extrema de fechas (quita horas y zonas horarias)
+    df.index = pd.to_datetime(df.index).normalize()
     if df.index.tz is not None:
         df.index = df.index.tz_localize(None)
+        
+    if not macro_df.empty:
+        macro_df.index = pd.to_datetime(macro_df.index).normalize()
+        if macro_df.index.tz is not None:
+            macro_df.index = macro_df.index.tz_localize(None)
     
     # 1. Cruzamos las cotizaciones de Wall Street con la macro de FRED (por fecha)
     if not macro_df.empty:
@@ -100,11 +105,11 @@ def transform(raw_data): # Corregido: Ahora recibe el diccionario
 def load(df):
     print("--- Iniciando Carga a SQLite ---")
     # Creamos la conexión a la base de datos local
-    engine = create_engine('sqlite:///adr_argentina.db')
+    engine = create_engine('sqlite:///adr_argentina_v2.db')
     
     # Guardamos los datos. 'replace' sobrescribe, 'append' acumula.
     df.to_sql('market_data', con=engine, if_exists='replace', index=False)
-    print("¡Datos cargados exitosamente en adr_argentina.db!")
+    print("¡Datos cargados exitosamente en adr_argentina_v2.db!")
 
 if __name__ == "__main__":
     # Ejecución del Pipeline
