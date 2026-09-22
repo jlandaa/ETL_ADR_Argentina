@@ -46,6 +46,11 @@ def transform(raw_data): # Corregido: Ahora recibe el diccionario
     # Separamos los diccionarios
     df = raw_data['yf'].copy()
     macro_df = raw_data['macro'].copy()
+
+    # ---> NUEVO: Normalizamos las zonas horarias para que Pandas pueda cruzarlas <---
+    df.index = pd.to_datetime(df.index)
+    if df.index.tz is not None:
+        df.index = df.index.tz_localize(None)
     
     # 1. Cruzamos las cotizaciones de Wall Street con la macro de FRED (por fecha)
     if not macro_df.empty:
