@@ -2,6 +2,11 @@ import yfinance as yf
 import pandas as pd
 from sqlalchemy import create_engine
 from datetime import datetime
+from fredapi import Fred # INTEGRACIÓN API FRED
+import streamlit as st # <-- IMPORTACIÓN PARA QUE OBTENER LA API KEY DESDE Streamlit
+
+# Obtenemos la clave de forma segura desde los secretos de Streamlit
+FRED_API_KEY = st.secrets["FRED_API_KEY"]
 
 def extract():
     print("--- Iniciando Extracción ---")
