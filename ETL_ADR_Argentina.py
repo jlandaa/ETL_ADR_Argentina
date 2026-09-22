@@ -70,7 +70,6 @@ def load(df):
     df.to_sql('market_data', con=engine, if_exists='replace', index=False)
     print("¡Datos cargados exitosamente en adr_argentina.db!")
 
-
 if __name__ == "__main__":
     # Ejecución del Pipeline
     raw_data = extract()
