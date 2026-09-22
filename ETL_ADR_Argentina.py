@@ -70,12 +70,6 @@ def load(df):
     df.to_sql('market_data', con=engine, if_exists='replace', index=False)
     print("¡Datos cargados exitosamente en adr_argentina.db!")
 
-def load(df):
-    print("--- Iniciando Carga a SQLite ---")
-    # Forzamos la v3 para que la nube lo cargue limpio
-    engine = create_engine('sqlite:///adr_argentina_v3.db')
-    df.to_sql('market_data', con=engine, if_exists='replace', index=False)
-    print("¡Datos cargados exitosamente en adr_argentina_v3.db!")
 
 if __name__ == "__main__":
     # Ejecución del Pipeline
