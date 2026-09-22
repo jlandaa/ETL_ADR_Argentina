@@ -312,8 +312,8 @@ if tickers:
         })
         st.dataframe(weights_df, hide_index=True)
         
-   else:
-        st.info("💡 Selecciona al menos dos activos en el menú lateral para habilitar el simulador de portafolios.")
+       else:
+            st.info("💡 Selecciona al menos dos activos en el menú lateral para habilitar el simulador de portafolios.")
         
     # --- Termómetro de Riesgo País: Brecha Cambiaria ---
     st.markdown("---")
