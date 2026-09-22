@@ -248,12 +248,18 @@ if tickers:
     
     # Necesitamos al menos 2 activos para hacer un portafolio
     if len(tickers) > 1:
-        # 1. Parámetros y Cálculos Estadísticos (Anualizados)
+       # 1. Parámetros y Cálculos Estadísticos (Anualizados)
         returns_pivot = df_pivot.dropna()
         mean_returns = returns_pivot.mean() * 252
         cov_matrix = returns_pivot.cov() * 252
         num_portfolios = 5000
-        risk_free_rate = 0.0 # Tasa libre de riesgo simplificada
+        
+        # NUEVO: Tasa Libre de Riesgo Dinámica (US Treasury 10Y)
+        # Tomamos el último valor disponible y lo pasamos a decimal (ej: 4.2% -> 0.042)
+        current_rf = df_filtered['Risk_Free_Rate'].dropna().iloc[-1]
+        risk_free_rate = current_rf / 100 
+        
+        st.caption(f"🏦 Tasa Libre de Riesgo utilizada (US Treasury 10Y actual): **{current_rf:.2f}%**")
         
         # Matrices para guardar los resultados
         results = np.zeros((3, num_portfolios))
@@ -306,8 +312,34 @@ if tickers:
         })
         st.dataframe(weights_df, hide_index=True)
         
-    else:
+   else:
         st.info("💡 Selecciona al menos dos activos en el menú lateral para habilitar el simulador de portafolios.")
+        
+    # --- Termómetro de Riesgo País: Brecha Cambiaria ---
+    st.markdown("---")
+    st.subheader("🔥 Riesgo Macro: Evolución de la Brecha Cambiaria")
+    
+    st.write("La brecha entre el Dólar CCL y el Dólar Oficial funciona como un termómetro directo del riesgo y estrés financiero en Argentina.")
+    
+    # Extraemos la data macroeconómica (solo necesitamos una fila por fecha)
+    df_macro = df_filtered[['Date', 'Brecha_Cambiaria', 'Dolar_CCL', 'Dolar_Oficial']].drop_duplicates().dropna()
+    
+    if not df_macro.empty:
+        fig_brecha = px.area(
+            df_macro, x='Date', y='Brecha_Cambiaria',
+            title="Brecha Cambiaria (CCL vs Oficial)",
+            labels={'Brecha_Cambiaria': 'Brecha (%)'},
+            color_discrete_sequence=['#ff4b4b']
+        )
+        # Rellenamos con un rojo sutil para indicar "peligro" cuando la brecha es alta
+        fig_brecha.update_traces(fillcolor='rgba(255, 75, 75, 0.2)')
+        
+        st.plotly_chart(fig_brecha, use_container_width=True)
+        
+        # Métrica rápida de la brecha actual
+        brecha_actual = df_macro['Brecha_Cambiaria'].iloc[-1]
+        st.metric(label="Brecha Cambiaria Actual", value=f"{brecha_actual:.1f}%")
+        
     # --- Análisis "What-If" (Simulador Manual de Portafolio) ---
     st.markdown("---")
     st.subheader("🎛️ Análisis 'What-If': Construye tu propio Portafolio")
