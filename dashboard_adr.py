@@ -27,7 +27,7 @@ sys.path.append(os.path.dirname(__file__))
 import ETL_ADR_Argentina as etl 
 
 # 2. Configuración de Base de Datos
-db_file = 'adr_argentina_v2.db'
+db_file = 'adr_argentina.db'
 engine = create_engine(f'sqlite:///{db_file}')
 
 # 3. Lógica de Control de Datos (Auto-ETL) con Logging
