@@ -443,25 +443,25 @@ if tickers:
             )
             
             # ==========================================
-            # CREACIÓN DEL BOTÓN PDF (Oculto si el peso es 0)
+            # CREACIÓN DEL BOTÓN PDF
             # ==========================================
-            # Generamos el PDF con los resultados actuales
+            # 1. Generamos el PDF silenciosamente
             pdf_bytes = generar_tear_sheet(
                 tickers_list=tickers, 
                 capital=initial_capital, 
                 rentabilidad=total_ret_whatif
-            ) 
-            
-             # Inyectamos el botón directamente debajo de los resultados del What-If (columna 2)
-            st.write("") # Espacio en blanco para separar visualmente
-            st.markdown("**📄 Reporte Ejecutivo de tu Simulación**")
-            st.download_button(
-                label="📥 Descargar Reporte What-If (PDF)",
-                data=pdf_bytes,
-                file_name="Reporte_WhatIf_ADRs.pdf",
-                mime="application/pdf",
-                use_container_width=True # Hace que el botón ocupe todo el ancho para verse más profesional
             )
+            
+            # 2. Volvemos a la columna 1 para colocar el botón y equilibrar el diseño
+            with col1:
+                st.markdown("---")
+                st.markdown("**📄 Exportar Simulación**")
+                st.download_button(
+                    label="📥 Descargar Reporte (PDF)",
+                    data=pdf_bytes,
+                    file_name="Reporte_WhatIf_ADRs.pdf",
+                    mime="application/pdf"
+                )
 
 # ---> Cierre del bloque principal <---
 else:
