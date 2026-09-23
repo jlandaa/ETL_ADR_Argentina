@@ -445,13 +445,12 @@ if tickers:
             # ==========================================
             # CREACIÓN DEL BOTÓN PDF (Oculto si el peso es 0)
             # ==========================================
-            # Llamamos a la función con el gráfico de esta simulación
+            # Generamos el PDF con los resultados actuales
             pdf_bytes = generar_tear_sheet(
                 tickers_list=tickers, 
                 capital=initial_capital, 
-                rentabilidad=total_ret_whatif, 
-                _figura_precios=fig_whatif 
-            )
+                rentabilidad=total_ret_whatif
+            ) 
             
              # Agregamos el botón al final del Sidebar
             st.sidebar.markdown("---")
