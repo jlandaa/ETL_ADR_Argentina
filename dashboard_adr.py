@@ -142,11 +142,13 @@ if tickers:
     df_filtered = df_filtered.sort_values(by=['Ticker', 'Date'])
     df_filtered['Active_Return'] = df_filtered.groupby('Ticker')['Price_Active'].pct_change()
 
+   # ==========================================
+    # SECCIÓN DE EXPORTACIÓN (CSV Y PDF)
+    # ==========================================
     st.sidebar.markdown("---")
     st.sidebar.subheader("📥 Exportar Datos")
 
-    # 1. Lógica y Botón del CSV (Se ejecuta y dibuja aquí mismo)
-    # Convertimos el DataFrame filtrado a CSV
+    # 1. Lógica y Botón del CSV
     @st.cache_data
     def convert_df(df):
         return df.to_csv(index=False).encode('utf-8')
@@ -166,22 +168,22 @@ if tickers:
         pdf = FPDF()
         pdf.add_page()
         
-        # Título
+        # Título (Sintaxis moderna FPDF2)
         pdf.set_font("helvetica", "B", 16)
-        pdf.cell(0, 10, "Tear Sheet - Portafolio ADRs Argentinos", ln=True, align="C")
+        pdf.cell(0, 10, "Tear Sheet - Portafolio ADRs Argentinos", new_x="LMARGIN", new_y="NEXT", align="C")
         pdf.ln(5)
         
         # Texto con Métricas
         pdf.set_font("helvetica", "", 12)
-        pdf.cell(0, 8, f"Activos analizados: {', '.join(tickers_list)}", ln=True)
-        pdf.cell(0, 8, f"Moneda de análisis: {currency}", ln=True)
-        pdf.cell(0, 8, f"Capital Inicial Simulado: ${capital:,.2f}", ln=True)
-        pdf.cell(0, 8, f"Rentabilidad Acumulada: {rentabilidad:.2f}%", ln=True)
+        pdf.cell(0, 8, f"Activos analizados: {', '.join(tickers_list)}", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 8, f"Moneda de análisis: {currency}", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 8, f"Capital Inicial Simulado: ${capital:,.2f}", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 8, f"Rentabilidad Acumulada: {rentabilidad:.2f}%", new_x="LMARGIN", new_y="NEXT")
         pdf.ln(10)
         
         # Convertir gráfico Plotly a imagen estática temporal
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
-            _figura_precios.write_image(tmpfile.name, engine="kaleido")
+            _figura_precios.write_image(tmpfile.name) # Sin 'engine'
             pdf.image(tmpfile.name, x=15, w=180)
             
         # Retornar PDF como bytes
@@ -445,15 +447,19 @@ if tickers:
                 delta=f"{total_ret_whatif:.2f}% de Rentabilidad Acumulada"
             )
             
+            # ==========================================
+            # CREACIÓN DEL BOTÓN PDF (Oculto si el peso es 0)
+            # ==========================================
             # Generamos el PDF con los resultados actuales
+            # Llamamos a la función con el gráfico de esta simulación
             pdf_bytes = generar_tear_sheet(
                 tickers_list=tickers, 
                 capital=initial_capital, 
                 rentabilidad=total_ret_whatif, 
-                _figura_precios=fig_price # Le pasamos tu gráfico de evolución
+                _figura_precios=fig_whatif 
             )
             
-            # Agregamos el botón al final del Sidebar
+             # Agregamos el botón al final del Sidebar
             st.sidebar.markdown("---")
             st.sidebar.subheader("📄 Reporte Ejecutivo")
             st.sidebar.download_button(
