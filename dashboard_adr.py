@@ -452,14 +452,15 @@ if tickers:
                 rentabilidad=total_ret_whatif
             ) 
             
-             # Agregamos el botón al final del Sidebar
-            st.sidebar.markdown("---")
-            st.sidebar.subheader("📄 Reporte Ejecutivo")
-            st.sidebar.download_button(
-                label="📥 Descargar Tear Sheet (PDF)",
+             # Inyectamos el botón directamente debajo de los resultados del What-If (columna 2)
+            st.write("") # Espacio en blanco para separar visualmente
+            st.markdown("**📄 Reporte Ejecutivo de tu Simulación**")
+            st.download_button(
+                label="📥 Descargar Reporte What-If (PDF)",
                 data=pdf_bytes,
-                file_name="Tear_Sheet_ADRs.pdf",
-                mime="application/pdf"
+                file_name="Reporte_WhatIf_ADRs.pdf",
+                mime="application/pdf",
+                use_container_width=True # Hace que el botón ocupe todo el ancho para verse más profesional
             )
 
 # ---> Cierre del bloque principal <---
