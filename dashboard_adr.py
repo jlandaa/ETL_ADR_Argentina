@@ -164,11 +164,11 @@ if tickers:
 
     # 2. Definición de la herramienta PDF (Se guarda en memoria para usarse al final)
     @st.cache_data
-    def generar_tear_sheet(tickers_list, capital, rentabilidad, _figura_precios):
+    def generar_tear_sheet(tickers_list, capital, rentabilidad): # <-- Quitamos _figura_precios
         pdf = FPDF()
         pdf.add_page()
         
-        # Título (Sintaxis moderna FPDF2)
+        # Título
         pdf.set_font("helvetica", "B", 16)
         pdf.cell(0, 10, "Tear Sheet - Portafolio ADRs Argentinos", new_x="LMARGIN", new_y="NEXT", align="C")
         pdf.ln(5)
@@ -181,11 +181,6 @@ if tickers:
         pdf.cell(0, 8, f"Rentabilidad Acumulada: {rentabilidad:.2f}%", new_x="LMARGIN", new_y="NEXT")
         pdf.ln(10)
         
-        # Convertir gráfico Plotly a imagen estática temporal
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
-            _figura_precios.write_image(tmpfile.name) # Sin 'engine'
-            pdf.image(tmpfile.name, x=15, w=180)
-            
         # Retornar PDF como bytes
         return pdf.output(dest="S")
 
