@@ -7,6 +7,7 @@ import os
 import sys
 import logging
 from fpdf import FPDF
+import matplotlib.pyplot as plt
 import tempfile
 
 logging.basicConfig(
@@ -162,13 +163,13 @@ if tickers:
         mime='text/csv',
     )
 
-    # 2. Definición de la herramienta PDF (Se guarda en memoria para usarse al final)
+    # 2. Definición de la herramienta PDF 
     @st.cache_data
-    def generar_tear_sheet(tickers_list, capital, rentabilidad): # <-- Quitamos _figura_precios
+    def generar_tear_sheet(tickers_list, capital, rentabilidad, df_plot, moneda): 
         pdf = FPDF()
         pdf.add_page()
         
-        # Título
+        # Título 
         pdf.set_font("helvetica", "B", 16)
         pdf.cell(0, 10, "Tear Sheet - Portafolio ADRs Argentinos", new_x="LMARGIN", new_y="NEXT", align="C")
         pdf.ln(5)
@@ -176,12 +177,27 @@ if tickers:
         # Texto con Métricas
         pdf.set_font("helvetica", "", 12)
         pdf.cell(0, 8, f"Activos analizados: {', '.join(tickers_list)}", new_x="LMARGIN", new_y="NEXT")
-        pdf.cell(0, 8, f"Moneda de análisis: {currency}", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 8, f"Moneda de análisis: {moneda}", new_x="LMARGIN", new_y="NEXT")
         pdf.cell(0, 8, f"Capital Inicial Simulado: ${capital:,.2f}", new_x="LMARGIN", new_y="NEXT")
         pdf.cell(0, 8, f"Rentabilidad Acumulada: {rentabilidad:.2f}%", new_x="LMARGIN", new_y="NEXT")
         pdf.ln(10)
         
-        # Retornar PDF como bytes (Sintaxis correcta FPDF2)
+        # --- NUEVO: Creación del gráfico estático con Matplotlib ---
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.plot(df_plot['Date'], df_plot[f'Capital ({moneda})'], color='#00b4d8', linewidth=2)
+        ax.fill_between(df_plot['Date'], df_plot[f'Capital ({moneda})'], color='#00b4d8', alpha=0.3)
+        ax.set_title(f"Evolución del Capital en {moneda}", fontsize=10, loc='left')
+        ax.grid(True, linestyle='--', alpha=0.5)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        
+        # Guardamos el gráfico temporalmente y lo pegamos en el PDF
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+            fig.savefig(tmpfile.name, format='png', bbox_inches='tight')
+            pdf.image(tmpfile.name, x=15, w=180)
+            
+        plt.close(fig) # Liberamos la memoria del servidor
+        
         return bytes(pdf.output())
 
  # --- Cálculo de Métricas (Ratio de Sharpe) ---
@@ -449,7 +465,9 @@ if tickers:
             pdf_bytes = generar_tear_sheet(
                 tickers_list=tickers, 
                 capital=initial_capital, 
-                rentabilidad=total_ret_whatif
+                rentabilidad=total_ret_whatif,
+                df_plot=df_portfolio,  # <-- Le pasamos la data de la curva
+                moneda=currency        # <-- Le pasamos la moneda activa
             )
             
             # 2. Volvemos a la columna 1 para colocar el botón y equilibrar el diseño
