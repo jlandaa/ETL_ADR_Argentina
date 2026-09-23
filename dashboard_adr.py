@@ -6,6 +6,8 @@ import plotly.express as px
 import os
 import sys
 import logging
+from fpdf import FPDF
+import tempfile
 
 logging.basicConfig(
     filename='etl_process.log',      # Nombre del archivo silencioso
@@ -142,7 +144,8 @@ if tickers:
 
     st.sidebar.markdown("---")
     st.sidebar.subheader("📥 Exportar Datos")
-    
+
+    # 1. Lógica y Botón del CSV (Se ejecuta y dibuja aquí mismo)
     # Convertimos el DataFrame filtrado a CSV
     @st.cache_data
     def convert_df(df):
@@ -156,6 +159,33 @@ if tickers:
         file_name='adrs_argentinos_filtrados.csv',
         mime='text/csv',
     )
+
+    # 2. Definición de la herramienta PDF (Se guarda en memoria para usarse al final)
+    @st.cache_data
+    def generar_tear_sheet(tickers_list, capital, rentabilidad, _figura_precios):
+        pdf = FPDF()
+        pdf.add_page()
+        
+        # Título
+        pdf.set_font("helvetica", "B", 16)
+        pdf.cell(0, 10, "Tear Sheet - Portafolio ADRs Argentinos", ln=True, align="C")
+        pdf.ln(5)
+        
+        # Texto con Métricas
+        pdf.set_font("helvetica", "", 12)
+        pdf.cell(0, 8, f"Activos analizados: {', '.join(tickers_list)}", ln=True)
+        pdf.cell(0, 8, f"Moneda de análisis: {currency}", ln=True)
+        pdf.cell(0, 8, f"Capital Inicial Simulado: ${capital:,.2f}", ln=True)
+        pdf.cell(0, 8, f"Rentabilidad Acumulada: {rentabilidad:.2f}%", ln=True)
+        pdf.ln(10)
+        
+        # Convertir gráfico Plotly a imagen estática temporal
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+            _figura_precios.write_image(tmpfile.name, engine="kaleido")
+            pdf.image(tmpfile.name, x=15, w=180)
+            
+        # Retornar PDF como bytes
+        return pdf.output(dest="S")
 
  # --- Cálculo de Métricas (Ratio de Sharpe) ---
     st.markdown("### 📈 Métricas de Rendimiento")
@@ -413,6 +443,24 @@ if tickers:
                 label=f"Valor Final del Portafolio ({currency})", 
                 value=f"${final_value:,.2f}", 
                 delta=f"{total_ret_whatif:.2f}% de Rentabilidad Acumulada"
+            )
+            
+            # Generamos el PDF con los resultados actuales
+            pdf_bytes = generar_tear_sheet(
+                tickers_list=tickers, 
+                capital=initial_capital, 
+                rentabilidad=total_ret_whatif, 
+                _figura_precios=fig_price # Le pasamos tu gráfico de evolución
+            )
+            
+            # Agregamos el botón al final del Sidebar
+            st.sidebar.markdown("---")
+            st.sidebar.subheader("📄 Reporte Ejecutivo")
+            st.sidebar.download_button(
+                label="📥 Descargar Tear Sheet (PDF)",
+                data=pdf_bytes,
+                file_name="Tear_Sheet_ADRs.pdf",
+                mime="application/pdf"
             )
 
 # ---> Cierre del bloque principal <---
