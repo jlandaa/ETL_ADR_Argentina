@@ -450,7 +450,6 @@ if tickers:
             # ==========================================
             # CREACIÓN DEL BOTÓN PDF (Oculto si el peso es 0)
             # ==========================================
-            # Generamos el PDF con los resultados actuales
             # Llamamos a la función con el gráfico de esta simulación
             pdf_bytes = generar_tear_sheet(
                 tickers_list=tickers, 
