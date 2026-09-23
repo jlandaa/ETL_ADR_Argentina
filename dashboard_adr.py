@@ -181,8 +181,8 @@ if tickers:
         pdf.cell(0, 8, f"Rentabilidad Acumulada: {rentabilidad:.2f}%", new_x="LMARGIN", new_y="NEXT")
         pdf.ln(10)
         
-        # Retornar PDF como bytes
-        return pdf.output(dest="S")
+        # Retornar PDF como bytes (Sintaxis correcta FPDF2)
+        return bytes(pdf.output())
 
  # --- Cálculo de Métricas (Ratio de Sharpe) ---
     st.markdown("### 📈 Métricas de Rendimiento")
